@@ -278,4 +278,64 @@ window.addEventListener('DOMContentLoaded', () => {
         '.menu .container',
         //'menu__item',
     ).render();
+
+    // Forms
+
+    const forms = document.querySelectorAll('form');
+
+    const message = {
+        loading: 'Загрузка',
+        succes: 'Спасибо! Скоро мы с вами свяжемся',
+        failure: 'что-то пошло не так...'
+    };
+
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); //Отмена стандартного поведения браузера. В данном случае перезагрузка странице при submit
+
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            //request.setRequestHeader('Content-type', 'multipart/form-data'); //Заголовок в данном случае добавлять не надо. Он добавляется автоматически. Из-за этого ошибка
+            /*                         //Для JSON заголовок нужен
+                                    request.setRequestHeader('Content-type', 'application/json');
+                                    const formData = new FormData(form);
+                                    //!!! всегда в формах в index.html у input должны быть name
+
+                                    const object = {};
+                                    formData.forEach(function(value, key) {
+                                        object[key] = value;
+                                    });
+
+                                    const json = JSON.stringify(object);
+
+                                    request.send(json); */
+            const formData = new FormData(form);
+            //!!! всегда в формах в index.html у input должны быть name
+
+            request.send(formData);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.succes;
+                    form.reset(); // Очищаем форму
+                    setTimeout(() => {
+                        statusMessage.remove(); //Убираем сообщение об успешной отправке через 2с
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    }
 });
