@@ -309,12 +309,13 @@ window.addEventListener('DOMContentLoaded', () => {
             //form.append(statusMessage);
             form.insertAdjacentElement('afterend', statusMessage); //более гибкий метод добавления элемента
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
+            /*             const request = new XMLHttpRequest();
+                        request.open('POST', 'server.php'); */
+
 
             //request.setRequestHeader('Content-type', 'multipart/form-data'); //Заголовок в данном случае добавлять не надо. Он добавляется автоматически. Из-за этого ошибка
             //Для JSON заголовок нужен
-            request.setRequestHeader('Content-type', 'application/json');
+            //request.setRequestHeader('Content-type', 'application/json');
             const formData = new FormData(form);
             //!!! всегда в формах в index.html у input должны быть name
 
@@ -323,31 +324,47 @@ window.addEventListener('DOMContentLoaded', () => {
                 object[key] = value;
             });
 
-            const json = JSON.stringify(object);
+            //const json = JSON.stringify(object);
 
-            request.send(json);
+            //request.send(json);
             //const formData = new FormData(form);
             //!!! всегда в формах в index.html у input должны быть name
 
             //request.send(formData);
 
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    //statusMessage.textContent = message.succes;//убираем, потому что мы уже будем использовать вместо сообщения модальное окно с сообщением
-                    showThanksModal(message.succes); //вЫЗЫВАЕМ ФУНУЦИЮ С модальным окном с сообщением
+            fetch('server.php', {
+                    method: "POST",
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify(object)
+                }).then(data => data.text())
+                .then(data => {
+                    console.log(data);
+                    showThanksModal(message.succes);
                     statusMessage.remove();
-                    form.reset(); // Очищаем форму
-                    /* setTimeout(() => {
-                        statusMessage.remove(); //Убираем сообщение об успешной отправке через 2с
-                    }, 2000); */
-                    //таймаут убираем, потому что мы уже будем использовать вместо сообщения модальное окно с сообщением
+                }).catch(() => { //Всегда помещать в конце!!! .catch - Если ошибка
+                    showThanksModal(message.failure);
+                }).finally(() => {
+                    form.reset(); //Всегда в самом конце. Что бы не случилось, это выполнится. В данном случае очистится форма
+                });
+            /*             request.addEventListener('load', () => {
+                            if (request.status === 200) {
+                                console.log(request.response);
+                                //statusMessage.textContent = message.succes;//убираем, потому что мы уже будем использовать вместо сообщения модальное окно с сообщением
+                                showThanksModal(message.succes); //вЫЗЫВАЕМ ФУНУЦИЮ С модальным окном с сообщением
+                                statusMessage.remove();
+                                form.reset(); // Очищаем форму
+                                /* setTimeout(() => {
+                                    statusMessage.remove(); //Убираем сообщение об успешной отправке через 2с
+                                }, 2000); */
+            //таймаут убираем, потому что мы уже будем использовать вместо сообщения модальное окно с сообщением
 
-                } else {
-                    //statusMessage.textContent = message.failure; ////убираем, потому что мы уже будем использовать вместо сообщения модальное окно с сообщением
-                    showThanksModal(message.failure); //вЫЗЫВАЕМ ФУНУЦИЮ С модальным окном с сообщением
-                }
-            });
+            /*                 } else {
+                                //statusMessage.textContent = message.failure; ////убираем, потому что мы уже будем использовать вместо сообщения модальное окно с сообщением
+                                showThanksModal(message.failure); //вЫЗЫВАЕМ ФУНУЦИЮ С модальным окном с сообщением
+                            }
+                        });  */
         });
     }
 
@@ -374,4 +391,14 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 4000);
     }
+
+    /*     fetch('https://jsonplaceholder.typicode.com/posts', { //Пример использования fetch
+                method: "POST",
+                body: JSON.stringify({ name: 'Alex' }),
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(json => console.log(json)); */
 });
